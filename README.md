@@ -85,8 +85,9 @@ ax.scatter(x, y, c=z, cmap="nicd-pink_r")
 
 ## Reproducing the demo
 
+From the cloned repo root:
+
 ```bash
-cd ~/Projects/matplotlib-nicd
 python demo.py
 ```
 
