@@ -1,0 +1,42 @@
+# NICD house style.
+#
+# Usage:
+#   import matplotlib.pyplot as plt
+#   plt.style.use("nicd")
+#
+# Custom gradient colormaps (nicd-green, nicd-cyan, nicd-pink) live in
+# ~/.matplotlib/nicd_palette.py — import that module once per process to
+# register them; mplstyle files can only set rcParams, not colormaps.
+
+# --- font ---------------------------------------------------------------
+font.family: sans-serif
+font.sans-serif: Derailed, Helvetica, Arial, DejaVu Sans, sans-serif
+
+# --- series palette -----------------------------------------------------
+# Uses named colours registered by ~/.matplotlib/nicd_palette.py — import
+# that module before applying the style.
+axes.prop_cycle: cycler('color', ['nicd:light-green', 'nicd:dark-green', 'nicd:blue', 'nicd:pink', 'nicd:purple', 'nicd:light-grey'])
+
+# --- sensible defaults that go with the look ----------------------------
+axes.facecolor:      white
+axes.edgecolor:      002d30
+axes.labelcolor:     002d30
+axes.titlecolor:     002d30
+axes.grid:           True
+grid.color:          002d30
+grid.alpha:          0.15
+grid.linewidth:      0.6
+
+xtick.color:         002d30
+ytick.color:         002d30
+text.color:          002d30
+
+figure.facecolor:    white
+savefig.facecolor:   white
+savefig.dpi:         150
+
+legend.frameon:      False
+
+# Derailed ships without the U+2212 MINUS SIGN — fall back to ASCII hyphen
+# on numeric tick labels rather than printing a tofu box.
+axes.unicode_minus:  False
