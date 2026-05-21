@@ -2,13 +2,16 @@
 
 Companion to ``~/.matplotlib/stylelib/nicd.mplstyle``. The mplstyle file
 sets the discrete series palette and font, but matplotlib stylesheets
-can't register colormaps — that has to happen in code. Import this module
-once per process to add the three gradients (``nicd-green``, ``nicd-blue``,
-``nicd-pink``):
+can't register colormaps or carry ``Path``-based markers — those have to
+happen in code. Import this module once per process to add the three
+gradients (``nicd-green``, ``nicd-blue``, ``nicd-pink``) and the named
+colours; call :func:`use` to apply the full style including the marker
+cycle:
 
     import sys, pathlib
     sys.path.insert(0, str(pathlib.Path.home() / ".matplotlib"))
-    import nicd_palette  # noqa: F401  -- registers cmaps as a side-effect
+    import nicd_palette
+    nicd_palette.use()             # style + colours + markers
 
     plt.imshow(arr, cmap="nicd-green")
 
@@ -16,9 +19,11 @@ Each colormap is also registered in its ``_r`` reversed form.
 """
 from __future__ import annotations
 
+from cycler import cycler
 import matplotlib as mpl
 from matplotlib import colors as mcolors
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.path import Path
 
 # Named series colours, namespaced ``nicd:`` to mirror matplotlib's own
 # ``tab:`` palette and avoid clashing with CSS names ("pink" / "purple"
@@ -37,6 +42,17 @@ _GRADIENTS = {
     "nicd-blue":  ("#00c3d6", "#00b0a2"),
     "nicd-pink":  ("#ff709d", "#aa1878"),
 }
+
+# Right triangle with the right angle at the top-right corner. Vertices
+# span [-1, 1] to match matplotlib's built-in triangle markers, so it
+# scales identically under ``markersize``.
+RIGHT_TRIANGLE = Path(
+    [(1.0, 1.0), (-1.0, 1.0), (1.0, -1.0), (1.0, 1.0)],
+    [Path.MOVETO, Path.LINETO, Path.LINETO, Path.CLOSEPOLY],
+)
+
+# Default marker cycle: the right triangle, then a circle, repeating.
+_MARKER_CYCLE = [RIGHT_TRIANGLE, "o"]
 
 
 def _register() -> None:
@@ -60,3 +76,24 @@ def _register() -> None:
 
 
 _register()
+
+
+def use() -> None:
+    """Apply the NICD style with the marker cycle wired up.
+
+    Equivalent to ``plt.style.use("nicd")`` plus an ``axes.prop_cycle``
+    override that pairs each series colour with a marker. The mplstyle
+    file can carry the colour cycle but not ``Path``-based markers, so
+    the marker half is set here.
+    """
+    import matplotlib.pyplot as plt
+
+    plt.style.use("nicd")
+    colours = list(_NAMED_COLOURS.keys())
+    markers = [_MARKER_CYCLE[i % len(_MARKER_CYCLE)] for i in range(len(colours))]
+    combined = cycler(color=colours) + cycler(marker=markers)
+    # RcParams.__setitem__ validates ``axes.prop_cycle`` markers as string|int
+    # only, rejecting Path objects. Downstream consumers (Axes._get_lines /
+    # Line2D.set_marker) handle Path markers fine, so bypass validation via
+    # the underlying dict to wire the cycle through.
+    dict.__setitem__(plt.rcParams, "axes.prop_cycle", combined)

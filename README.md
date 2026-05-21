@@ -10,7 +10,7 @@ NICD brand.
 | File | What it provides |
 |---|---|
 | `nicd.mplstyle` | The style: series colour cycle, font (Derailed), grid/text colours, ASCII minus sign. |
-| `nicd_palette.py` | Registers the six named colours and three gradient colormaps with matplotlib at import time. |
+| `nicd_palette.py` | Registers the six named colours and three gradient colormaps at import time; exposes `use()` to apply the style plus the marker cycle. |
 | `demo.py` | Reproduces the image above. |
 
 ### Named colours (`nicd:` namespace)
@@ -33,6 +33,14 @@ NICD brand.
 | `nicd-pink`  | `#ff709d` → `#aa1878` |
 
 Each is also registered in its reversed `_r` form.
+
+### Marker cycle
+
+`nicd_palette.use()` pairs the colour cycle with a marker cycle:
+`RIGHT_TRIANGLE` (right angle at top-right) for odd-indexed series, `o`
+(circle) for even-indexed series, repeating to match the six-colour
+cycle. The triangle lives at `nicd_palette.RIGHT_TRIANGLE` if you want
+to address it directly.
 
 ## Install
 
@@ -66,11 +74,11 @@ sys.path.insert(0, str(pathlib.Path.home() / ".matplotlib"))
 import nicd_palette        # registers names + colormaps
 import matplotlib.pyplot as plt
 
-plt.style.use("nicd")      # series cycle + font + grid colours
+nicd_palette.use()         # style + colour cycle + marker cycle
 
-# Series colours come from the cycle automatically.
-ax.plot(x, a, label="A")
-ax.plot(x, b, label="B")
+# Series colours and markers come from the cycle automatically.
+ax.plot(x, a, label="A")   # light-green + right triangle
+ax.plot(x, b, label="B")   # dark-green + circle
 
 # Or address one by name.
 ax.fill_between(x, 0, y, color="nicd:light-green")
@@ -79,6 +87,10 @@ ax.fill_between(x, 0, y, color="nicd:light-green")
 ax.imshow(grid, cmap="nicd-green")
 ax.scatter(x, y, c=z, cmap="nicd-pink_r")
 ```
+
+If you only want the colours (no markers), use `plt.style.use("nicd")`
+directly — the marker half is only added by `nicd_palette.use()` because
+`Path`-based markers can't be expressed in an mplstyle file.
 
 `nicd_palette` must be imported **before** any draw call, because the style's
 `axes.prop_cycle` references the named colours rather than hex literals.

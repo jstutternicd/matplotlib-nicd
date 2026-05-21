@@ -35,7 +35,7 @@ GRADIENTS = ["nicd-green", "nicd-blue", "nicd-pink"]
 
 
 def main() -> None:
-    plt.style.use("nicd")
+    nicd_palette.use()
 
     fig = plt.figure(figsize=(13, 8), constrained_layout=True)
     fig.suptitle("NICD matplotlib style", fontsize=22, fontweight="bold")
@@ -46,7 +46,14 @@ def main() -> None:
     ax_lines = fig.add_subplot(gs[0:2, :2])
     x = np.linspace(0, 4 * np.pi, 400)
     for i, label in enumerate(PALETTE_LABELS):
-        ax_lines.plot(x, np.sin(x + i * 0.5) + i * 0.25, linewidth=2.2, label=label)
+        ax_lines.plot(
+            x,
+            np.sin(x + i * 0.5) + i * 0.25,
+            linewidth=2.2,
+            markevery=25,
+            markersize=8,
+            label=label,
+        )
     ax_lines.set_title("Series palette  (axes.prop_cycle)")
     ax_lines.set_xlabel("x")
     ax_lines.set_ylabel("y")
